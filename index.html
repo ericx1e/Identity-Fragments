@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identity Fragments</title>
+    <style>
+        :root {
+            --primary-color: #8a2be2;
+            --secondary-color: #ff4500;
+            --tertiary-color: #00ced1;
+            --background-color: #121212;
+            --text-color: #f5f5f5;
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            transition: background-color 0.5s;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            text-align: center;
+            padding: 2rem 0;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.8;
+        }
+        
+        .identity-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 3rem 0;
+        }
+        
+        .identity-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 1.5rem;
+            width: 100%;
+            max-width: 900px;
+            margin: 2rem 0;
+        }
+        
+        @media (max-width: 768px) {
+            .identity-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .identity-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .identity-aspect {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .identity-aspect:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .identity-aspect h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: var(--tertiary-color);
+        }
+        
+        .identity-aspect p {
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+        
+        .aspect-options {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        
+        .option-btn {
+            background: none;
+            border: 1px solid var(--primary-color);
+            color: var(--text-color);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            font-size: 0.9rem;
+        }
+        
+        .option-btn:hover, .option-btn.active {
+            background-color: var(--primary-color);
+            transform: scale(1.05);
+        }
+        
+        .identity-preview {
+            margin: 3rem auto;
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            overflow: visible;
+        }
+        
+        .fragment {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-color: var(--tertiary-color);
+            opacity: 0.7;
+            border-radius: 50%;
+            transition: transform 0.5s, opacity 0.5s, background-color 0.5s, filter 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: black;
+            font-weight: bold;
+            text-align: center;
+            font-size: 0.85rem;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            animation: pulseGlitch 8s infinite;
+        }
+        
+        @keyframes pulseGlitch {
+            0% { transform: translate(var(--x), var(--y)); }
+            10% { transform: translate(calc(var(--x) + 3px), calc(var(--y) - 2px)); }
+            10.5% { transform: translate(calc(var(--x) - 5px), calc(var(--y) + 5px)); }
+            11% { transform: translate(var(--x), var(--y)); }
+            30% { transform: translate(var(--x), var(--y)); }
+            30.25% { transform: translate(calc(var(--x) + 7px), calc(var(--y) + 3px)) scale(1.05); }
+            30.5% { transform: translate(calc(var(--x) - 2px), calc(var(--y) - 2px)) scale(0.95); }
+            30.75% { transform: translate(var(--x), var(--y)); }
+            50% { transform: translate(var(--x), var(--y)); }
+            80% { transform: translate(var(--x), var(--y)); }
+            80.25% { filter: blur(2px); transform: translate(calc(var(--x) - 4px), var(--y)) scale(1.03); }
+            80.5% { filter: blur(0); transform: translate(var(--x), var(--y)); }
+            100% { transform: translate(var(--x), var(--y)); }
+        }
+        
+        .glitch {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect x="0" y="0" width="100" height="100" fill="none" stroke="white" stroke-width="0.5" stroke-dasharray="5,5" /></svg>');
+            opacity: 0.3;  /* Increased from 0.1 */
+            pointer-events: none;
+            z-index: 5;
+            animation: glitchEffect 8s infinite;
+        }
+        
+        @keyframes glitchEffect {
+            0% { opacity: 0.3; }
+            5% { opacity: 0.5; background-position: 2px 3px; }
+            10% { opacity: 0.3; }
+            15% { opacity: 0.6; background-position: -2px -3px; }
+            16% { opacity: 0.3; background-position: 0 0; }
+            100% { opacity: 0.3; }
+        }
+        
+        /* Full screen glitch effect that appears occasionally */
+        .full-glitch {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0.1));
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0;
+            display: none;
+        }
+        
+        .message {
+            text-align: center;
+            margin: 2rem 0;
+            font-style: italic;
+            opacity: 0.8;
+            transition: opacity 0.5s;
+        }
+        
+        .reset-btn {
+            display: block;
+            margin: 2rem auto;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        
+        .reset-btn:hover {
+            background-color: #ff6347;
+        }
+        
+        .attribution {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        .artist-statement {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 3rem 0;
+            line-height: 1.6;
+        }
+        
+        .artist-statement h2 {
+            color: var(--tertiary-color);
+            margin-bottom: 1rem;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="glitch"></div>
+    <div class="full-glitch"></div>
+    
+    <div class="container">
+        <header>
+            <h1>Identity Fragments</h1>
+            <div class="subtitle">An interactive exploration of intersectionality and embodiment in the performance of self</div>
+        </header>
+        
+        <div class="identity-container">
+            <p>Select different aspects of identity to see how they interact, fragment, and reconfigure the self. Notice how no complete "whole" can ever form, reflecting the fractured nature of identity under hegemonic systems.</p>
+            
+            <div class="identity-preview">
+            </div>
+            
+            <div class="message">Begin selecting identity aspects to see how they fragment and reconfigure...</div>
+            
+            <div class="identity-grid">
+                <div class="identity-aspect" data-aspect="race">
+                    <h3>Race/Ethnicity</h3>
+                    <p>How do racial categories fragment our understanding of self?</p>
+                    <div class="aspect-options">
+                        <button class="option-btn" data-color="#FDA7DF" data-value="Black">Black</button>
+                        <button class="option-btn" data-color="#D980FA" data-value="Asian">Asian</button>
+                        <button class="option-btn" data-color="#9980FA" data-value="Latinx">Latinx</button>
+                        <button class="option-btn" data-color="#5758BB" data-value="White">White</button>
+                        <button class="option-btn" data-color="#1289A7" data-value="Indigenous">Indigenous</button>
+                        <button class="option-btn" data-color="#A3CB38" data-value="Multiracial">Multiracial</button>
+                    </div>
+                </div>
+                
+                <div class="identity-aspect" data-aspect="gender">
+                    <h3>Gender</h3>
+                    <p>How does gender expression reconfigure our embodied experience?</p>
+                    <div class="aspect-options">
+                        <button class="option-btn" data-color="#FEA47F" data-value="Woman">Woman</button>
+                        <button class="option-btn" data-color="#F97F51" data-value="Man">Man</button>
+                        <button class="option-btn" data-color="#B33771" data-value="Non-binary">Non-binary</button>
+                        <button class="option-btn" data-color="#6D214F" data-value="Genderfluid">Genderfluid</button>
+                        <button class="option-btn" data-color="#182C61" data-value="Agender">Agender</button>
+                        <button class="option-btn" data-color="#FC427B" data-value="Two-Spirit">Two-Spirit</button>
+                    </div>
+                </div>
+                
+                <div class="identity-aspect" data-aspect="class">
+                    <h3>Socioeconomic Class</h3>
+                    <p>How does class position shape our access to social spaces?</p>
+                    <div class="aspect-options">
+                        <button class="option-btn" data-color="#25CCF7" data-value="Working Class">Working Class</button>
+                        <button class="option-btn" data-color="#3B3B98" data-value="Middle Class">Middle Class</button>
+                        <button class="option-btn" data-color="#341f97" data-value="Upper Class">Upper Class</button>
+                        <button class="option-btn" data-color="#1B9CFC" data-value="In Poverty">In Poverty</button>
+                        <button class="option-btn" data-color="#82589F" data-value="Class Mobile">Class Mobile</button>
+                    </div>
+                </div>
+                
+                <div class="identity-aspect" data-aspect="ability">
+                    <h3>Ability/Disability</h3>
+                    <p>How do conceptions of ability fragment our understanding of bodies?</p>
+                    <div class="aspect-options">
+                        <button class="option-btn" data-color="#D6A2E8" data-value="Neurotypical">Neurotypical</button>
+                        <button class="option-btn" data-color="#9AECDB" data-value="Neurodivergent">Neurodivergent</button>
+                        <button class="option-btn" data-color="#FD7272" data-value="Physical Disability">Physical Disability</button>
+                        <button class="option-btn" data-color="#EAB543" data-value="Chronic Illness">Chronic Illness</button>
+                        <button class="option-btn" data-color="#55E6C1" data-value="Mental Health">Mental Health</button>
+                    </div>
+                </div>
+                
+                <div class="identity-aspect" data-aspect="sexuality">
+                    <h3>Sexuality</h3>
+                    <p>How does sexuality inform our relational positioning?</p>
+                    <div class="aspect-options">
+                        <button class="option-btn" data-color="#58B19F" data-value="Heterosexual">Heterosexual</button>
+                        <button class="option-btn" data-color="#2C3A47" data-value="Gay">Gay</button>
+                        <button class="option-btn" data-color="#B33771" data-value="Lesbian">Lesbian</button>
+                        <button class="option-btn" data-color="#3B3B98" data-value="Bisexual">Bisexual</button>
+                        <button class="option-btn" data-color="#FD7272" data-value="Pansexual">Pansexual</button>
+                        <button class="option-btn" data-color="#9AECDB" data-value="Asexual">Asexual</button>
+                        <button class="option-btn" data-color="#D6A2E8" data-value="Queer">Queer</button>
+                    </div>
+                </div>
+                
+                <div class="identity-aspect" data-aspect="language">
+                    <h3>Language</h3>
+                    <p>How does linguistic identity shape our ability to express ourselves?</p>
+                    <div class="aspect-options">
+                        <button class="option-btn" data-color="#F8EFBA" data-value="Monolingual">Monolingual</button>
+                        <button class="option-btn" data-color="#F97F51" data-value="Bilingual">Bilingual</button>
+                        <button class="option-btn" data-color="#B33771" data-value="Multilingual">Multilingual</button>
+                        <button class="option-btn" data-color="#3B3B98" data-value="Language Learner">Language Learner</button>
+                        <button class="option-btn" data-color="#FD7272" data-value="Accent">Accent</button>
+                        <button class="option-btn" data-color="#9AECDB" data-value="Code-switching">Code-switching</button>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="reset-btn">Reset Identity Fragments</button>
+            
+            <div class="artist-statement">
+                <h2>Artist Statement</h2>
+                <p>
+                    "Identity Fragments" is an interactive digital piece exploring the fractured nature of identity through the lens of intersectionality and embodiment. This work investigates     how we perform different aspects of our identities in various contexts, never achieving a complete, unified self under hegemonic systems that categorize and fragment human experience.
+                </p>
+                <p>
+                    The circular fragments represent how identity aspects overlap, compete, and sometimes contradict, reflecting social forces that shape our embodied experiences. As viewers select different identity categories, they engage in the act of performative identity construction, seeing visually how no combination ever forms a unified whole.
+                </p>
+            </div>
+        </div>
+        
+        <div class="attribution">
+            Inspired by performance art and digital media artists exploring identity politics through interactive experiences.
+        </div>
+    </div>
+    
+    <footer>
+        <p>Created for WGSS 250: Women, Art, and Culture | Spring 2025</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const identityPreview = document.querySelector('.identity-preview');
+            const message = document.querySelector('.message');
+            const resetBtn = document.querySelector('.reset-btn');
+            const optionBtns = document.querySelectorAll('.option-btn');
+            const aspects = {};
+            
+            // Initialize fragments
+            function createFragment(aspect, value, color) {
+                // Remove existing fragment for this aspect if it exists
+                const existingFragment = document.querySelector(`.fragment[data-aspect="${aspect}"]`);
+                if (existingFragment) {
+                    existingFragment.remove();
+                }
+                
+                // Create new fragment
+                const fragment = document.createElement('div');
+                fragment.className = 'fragment';
+                fragment.dataset.aspect = aspect;
+                fragment.textContent = value;
+                fragment.style.backgroundColor = color;
+                
+                // Random position with slight offset from center
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 30 + Math.random() * 70;
+                const x = Math.cos(angle) * distance;
+                const y = Math.sin(angle) * distance;
+                
+                // Store the base position as CSS variables for the animation
+                fragment.style.setProperty('--x', `${x}px`);
+                fragment.style.setProperty('--y', `${y}px`);
+                fragment.style.transform = `translate(${x}px, ${y}px)`;
+                
+                // Add more intense glitch effect occasionally
+                if (Math.random() > 0.5) { // Increased probability from 0.7 to 0.5
+                    setTimeout(() => {
+                        // More extreme position changes
+                        const glitchX = x + (Math.random() * 40 - 20);
+                        const glitchY = y + (Math.random() * 40 - 20);
+                        fragment.style.transform = `translate(${glitchX}px, ${glitchY}px) scale(${0.7 + Math.random() * 0.6}) rotate(${Math.random() * 20 - 10}deg)`;
+                        fragment.style.opacity = Math.random() * 0.4 + 0.4;
+                        
+                        // Add occasional filter effects
+                        if (Math.random() > 0.5) {
+                            const filterType = Math.floor(Math.random() * 3);
+                            switch(filterType) {
+                                case 0:
+                                    fragment.style.filter = `blur(${Math.random() * 2}px)`;
+                                    break;
+                                case 1:
+                                    fragment.style.filter = `hue-rotate(${Math.random() * 180}deg)`;
+                                    break;
+                                case 2:
+                                    fragment.style.filter = `contrast(${0.5 + Math.random() * 1.5})`;
+                                    break;
+                            }
+                            
+                            // Reset filter after a short delay
+                            setTimeout(() => {
+                                fragment.style.filter = '';
+                            }, Math.random() * 1000 + 500);
+                        }
+                    }, Math.random() * 1500 + 500); // More frequent timing
+                }
+                
+                identityPreview.appendChild(fragment);
+                
+                // Update message
+                updateMessage();
+            }
+            
+            // Update the message based on selections with more frequent glitches
+            function updateMessage() {
+                const fragmentCount = document.querySelectorAll('.fragment').length;
+                
+                if (fragmentCount === 0) {
+                    message.textContent = "Begin selecting identity aspects to see how they fragment and reconfigure...";
+                    return;
+                }
+                
+                const messages = [
+                    "Notice how the fragments never form a complete whole...",
+                    "Each selection reveals the impossibility of a unified identity...",
+                    "The contradictions between fragments reflect social tensions...",
+                    "Intersectionality reveals the complexity of embodied experience...",
+                    "Identity is always in flux, never fixed or complete...",
+                    "Hegemonic categories fragment our understanding of self...",
+                    "The self is always already fragmented...",
+                    "These fragments contain multiplicities of being..."
+                ];
+                
+                message.textContent = messages[Math.floor(Math.random() * messages.length)];
+                
+                // Much more frequent text glitches
+                if (Math.random() > 0.4) { // Increased probability from 0.8 to 0.4
+                    setTimeout(() => {
+                        const text = message.textContent;
+                        let glitchType = Math.floor(Math.random() * 4);
+                        
+                        switch(glitchType) {
+                            case 0: // Character replacement
+                                const glitchChars = '█▓▒░█▓▒░█▓▒░!@#$%^&*()';
+                                const glitchedText = text.split('').map(char => 
+                                    Math.random() > 0.8 ? glitchChars[Math.floor(Math.random() * glitchChars.length)] : char
+                                ).join('');
+                                message.textContent = glitchedText;
+                                break;
+                                
+                            case 1: // Text duplication with offset
+                                message.innerHTML = `<span style="position:relative;">${text}</span>`;
+                                const span = message.querySelector('span');
+                                const ghost = document.createElement('span');
+                                ghost.textContent = text;
+                                ghost.style.position = 'absolute';
+                                ghost.style.left = `${Math.random() * 6 - 3}px`;
+                                ghost.style.top = `${Math.random() * 6 - 3}px`;
+                                ghost.style.color = 'rgba(255,255,255,0.4)';
+                                ghost.style.zIndex = '-1';
+                                span.appendChild(ghost);
+                                break;
+                                
+                            case 2: // Word scrambling
+                                const words = text.split(' ');
+                                const scrambledWords = words.map(word => 
+                                    Math.random() > 0.7 ? 
+                                    word.split('').sort(() => Math.random() - 0.5).join('') : 
+                                    word
+                                );
+                                message.textContent = scrambledWords.join(' ');
+                                break;
+                                
+                            case 3: // CSS glitch effects
+                                message.style.textShadow = `${Math.random() * 10 - 5}px ${Math.random() * 6 - 3}px var(--primary-color)`;
+                                message.style.letterSpacing = `${Math.random() * 2}px`;
+                                setTimeout(() => {
+                                    message.style.textShadow = '';
+                                    message.style.letterSpacing = '';
+                                }, 300);
+                                break;
+                        }
+                        
+                        // Reset after a short delay
+                        setTimeout(() => {
+                            message.textContent = text;
+                        }, 300 + Math.random() * 200);
+                    }, Math.random() * 1500 + 500); // More frequent timing
+                }
+            }
+            
+            // Handle button clicks
+            optionBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const aspect = this.closest('.identity-aspect').dataset.aspect;
+                    const value = this.dataset.value;
+                    const color = this.dataset.color;
+                    
+                    // Deactivate other buttons in this aspect
+                    this.closest('.aspect-options').querySelectorAll('.option-btn').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    
+                    // Activate this button
+                    this.classList.add('active');
+                    
+                    // Create or update fragment
+                    createFragment(aspect, value, color);
+                    
+                    // Change body background slightly
+                    document.body.style.backgroundColor = `hsl(${Math.floor(Math.random() * 360)}, 10%, 10%)`;
+                });
+            });
+            
+            // Add full screen glitch effect
+            function fullScreenGlitch() {
+                const fullGlitch = document.querySelector('.full-glitch');
+                
+                // Only trigger occasionally
+                if (Math.random() > 0.7 && document.querySelectorAll('.fragment').length > 0) {
+                    fullGlitch.style.display = 'block';
+                    
+                    // Random glitch effect type
+                    const effectType = Math.floor(Math.random() * 5);
+                    
+                    switch(effectType) {
+                        case 0: // Horizontal lines
+                            fullGlitch.style.background = `repeating-linear-gradient(
+                                0deg,
+                                rgba(255,255,255,0.1),
+                                rgba(255,255,255,0.1) 1px,
+                                transparent 1px,
+                                transparent 2px
+                            )`;
+                            break;
+                            
+                        case 1: // CRT scan line
+                            fullGlitch.style.background = 'transparent';
+                            fullGlitch.style.boxShadow = 'inset 0 0 50px rgba(0,255,255,0.15)';
+                            fullGlitch.style.borderTop = '1px solid rgba(255,255,255,0.5)';
+                            fullGlitch.style.animation = 'none';
+                            
+                            // Animate scan line
+                            fullGlitch.animate([
+                                { top: '0%' },
+                                { top: '100%' }
+                            ], {
+                                duration: 200,
+                                iterations: 1
+                            });
+                            break;
+                            
+                        case 2: // Color shift overlay
+                            fullGlitch.style.background = 'transparent';
+                            fullGlitch.style.boxShadow = 'none';
+                            fullGlitch.style.border = 'none';
+                            
+                            // Create temporary RGB shift layers
+                            const redLayer = document.createElement('div');
+                            redLayer.style.cssText = `
+                                position: fixed;
+                                top: 0;
+                                left: 0;
+                                width: 100%;
+                                height: 100%;
+                                background: rgba(255,0,0,0.1);
+                                mix-blend-mode: screen;
+                                pointer-events: none;
+                                z-index: 101;
+                                transform: translateX(-5px);
+                            `;
+                            
+                            const blueLayer = document.createElement('div');
+                            blueLayer.style.cssText = `
+                                position: fixed;
+                                top: 0;
+                                left: 0;
+                                width: 100%;
+                                height: 100%;
+                                background: rgba(0,0,255,0.1);
+                                mix-blend-mode: screen;
+                                pointer-events: none;
+                                z-index: 102;
+                                transform: translateX(5px);
+                            `;
+                            
+                            document.body.appendChild(redLayer);
+                            document.body.appendChild(blueLayer);
+                            
+                            // Remove after effect
+                            setTimeout(() => {
+                                redLayer.remove();
+                                blueLayer.remove();
+                            }, 150);
+                            break;
+                            
+                        case 3: // Flash
+                            fullGlitch.style.background = 'white';
+                            fullGlitch.style.opacity = '0.1';
+                            break;
+                            
+                        case 4: // Digital distortion
+                            fullGlitch.style.background = 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 100 100\'><rect x=\'0\' y=\'0\' width=\'100\' height=\'100\' fill=\'none\' stroke=\'white\' stroke-width=\'1\' stroke-dasharray=\'5,5\' /></svg>")';
+                            fullGlitch.style.backgroundSize = '5px 5px';
+                            fullGlitch.style.opacity = '0.15';
+                            break;
+                    }
+                    
+                    // Show the glitch briefly
+                    fullGlitch.style.opacity = '1';
+                    
+                    setTimeout(() => {
+                        fullGlitch.style.opacity = '0';
+                        
+                        setTimeout(() => {
+                            fullGlitch.style.display = 'none';
+                            fullGlitch.style.background = '';
+                            fullGlitch.style.boxShadow = '';
+                            fullGlitch.style.border = '';
+                        }, 100);
+                    }, 150);
+                }
+            }
+            
+            // Trigger full screen glitch occasionally
+            setInterval(fullScreenGlitch, 4000);
+            
+            // Also trigger after button clicks
+            optionBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (Math.random() > 0.5) {
+                        setTimeout(fullScreenGlitch, 100);
+                    }
+                });
+            });
+            
+            // More frequent and intense random glitches
+            setInterval(() => {
+                const fragments = document.querySelectorAll('.fragment');
+                if (fragments.length > 0) {
+                    // Glitch multiple fragments at once (between 1-3 fragments)
+                    const glitchCount = Math.floor(Math.random() * 3) + 1;
+                    
+                    for (let i = 0; i < glitchCount && i < fragments.length; i++) {
+                        const randomIndex = Math.floor(Math.random() * fragments.length);
+                        const randomFragment = fragments[randomIndex];
+                        const currentTransform = randomFragment.style.transform;
+                        
+                        // More intense glitch effects
+                        const glitchType = Math.floor(Math.random() * 5);
+                        
+                        switch(glitchType) {
+                            case 0: // Scale distortion
+                                randomFragment.style.transform = `${currentTransform} scale(${0.6 + Math.random() * 0.8})`;
+                                randomFragment.style.opacity = 0.2 + Math.random() * 0.5;
+                                break;
+                            case 1: // Position jump
+                                const jumpX = (Math.random() * 40) - 20;
+                                const jumpY = (Math.random() * 40) - 20;
+                                randomFragment.style.transform = `${currentTransform} translate(${jumpX}px, ${jumpY}px)`;
+                                randomFragment.style.opacity = 0.3 + Math.random() * 0.4;
+                                break;
+                            case 2: // Rotation
+                                const rotate = (Math.random() * 90) - 45;
+                                randomFragment.style.transform = `${currentTransform} rotate(${rotate}deg)`;
+                                randomFragment.style.opacity = 0.4 + Math.random() * 0.6;
+                                break;
+                            case 3: // Color shift
+                                const hue = Math.floor(Math.random() * 360);
+                                randomFragment.style.filter = `hue-rotate(${hue}deg)`;
+                                randomFragment.style.opacity = 0.3 + Math.random() * 0.5;
+                                break;
+                            case 4: // Blur effect
+                                randomFragment.style.filter = `blur(${Math.random() * 4}px)`;
+                                randomFragment.style.opacity = 0.4 + Math.random() * 0.4;
+                                break;
+                        }
+                        
+                        // Reset after a short time
+                        setTimeout(() => {
+                            randomFragment.style.transform = currentTransform;
+                            randomFragment.style.opacity = 0.7;
+                            randomFragment.style.filter = '';
+                        }, 200 + Math.random() * 400);
+                    }
+                }
+            }, 2000);
+            // Reset button
+            resetBtn.addEventListener('click', function() {
+                // Remove all fragments
+                const fragments = document.querySelectorAll('.fragment');
+                fragments.forEach(fragment => {
+                    fragment.remove();
+                });
+                
+                // Deactivate all buttons
+                optionBtns.forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                // Reset background
+                document.body.style.backgroundColor = '';
+                
+                // Reset message
+                updateMessage();
+                
+                // Add a reset glitch effect
+                setTimeout(fullScreenGlitch, 100);
+            });
+        });
+    </script>
+</body>
+</html>
